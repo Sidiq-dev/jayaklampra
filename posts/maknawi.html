@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maknawi - Jaya Klampra</title>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-primary: #0a0a0c;
+    --bg-secondary: #111113;
+    --bg-card: #161618;
+    --text-primary: #e8e6e3;
+    --text-secondary: #9b9a97;
+    --accent: #c9a87c;
+    --accent-glow: rgba(201, 168, 124, 0.1);
+    --border: rgba(255, 255, 255, 0.08);
+}
+
+body {
+    font-family: 'Georgia', serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.8;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* Header */
+header {
+    padding: 80px 0 40px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+}
+
+.site-title {
+    font-size: 2.2rem;
+    font-weight: normal;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+}
+
+.site-tagline {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* Navigation */
+nav {
+    padding: 24px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+nav a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+    position: relative;
+}
+
+nav a:hover {
+    color: var(--accent);
+}
+
+nav a::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--accent);
+    transition: width 0.3s;
+}
+
+nav a:hover::after {
+    width: 100%;
+}
+
+/* Main Content */
+main {
+    padding: 60px 0 100px;
+}
+
+/* Hero Section */
+.hero {
+    text-align: center;
+    padding: 60px 0 80px;
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: normal;
+    margin-bottom: 24px;
+    color: var(--accent);
+}
+
+.hero-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Post Grid */
+.post-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 32px;
+}
+
+/* Post Card */
+.post-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.post-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.post-card-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background: var(--bg-secondary);
+}
+
+.post-card-no-image {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-card) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--border);
+}
+
+.post-card-content {
+    padding: 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.post-card-title {
+    font-size: 1.2rem;
+    font-weight: normal;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+.post-card-title a {
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.post-card-title a:hover {
+    color: var(--accent);
+}
+
+.post-card-excerpt {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+}
+
+.post-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: auto;
+}
+
+.post-card-date {
+    font-style: italic;
+}
+
+.post-card-category {
+    color: var(--accent);
+}
+
+/* Single Post */
+.post-header {
+    text-align: center;
+    padding: 40px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+}
+
+.post-title-large {
+    font-size: 2.5rem;
+    font-weight: normal;
+    margin-bottom: 24px;
+    line-height: 1.3;
+}
+
+.post-meta-info {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.post-meta-info span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.post-content {
+    font-size: 1.15rem;
+    line-height: 1.9;
+}
+
+.post-content h2 {
+    font-size: 1.8rem;
+    font-weight: normal;
+    margin: 56px 0 24px;
+    color: var(--accent);
+}
+
+.post-content h3 {
+    font-size: 1.4rem;
+    font-weight: normal;
+    margin: 40px 0 20px;
+    color: var(--text-primary);
+}
+
+.post-content p {
+    margin-bottom: 28px;
+}
+
+.post-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 40px auto;
+    display: block;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.content-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 40px 0;
+}
+
+.image-caption {
+    margin: 40px 0;
+}
+
+.image-caption img {
+    margin-bottom: 12px;
+}
+
+.image-caption figcaption {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.post-content blockquote {
+    border-left: 3px solid var(--accent);
+    padding-left: 28px;
+    margin: 40px 0;
+    font-style: italic;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+}
+
+.post-content ul, .post-content ol {
+    margin-left: 28px;
+    margin-bottom: 32px;
+}
+
+.post-content li {
+    margin-bottom: 16px;
+}
+
+.download-box {
+    text-align: center;
+    margin: 40px 0;
+    padding: 40px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.download-link {
+    display: inline-block;
+    padding: 16px 32px;
+    background: var(--accent);
+    color: var(--bg-primary);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.download-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(201, 168, 124, 0.3);
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 80px;
+    padding: 12px 24px;
+    background: var(--bg-card);
+    color: var(--accent);
+    text-decoration: none;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+}
+
+.back-link:hover {
+    background: var(--accent);
+    color: var(--bg-primary);
+}
+
+/* Footer */
+footer {
+    padding: 60px 0 40px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+/* Page Styles */
+.page-content {
+    font-size: 1.15rem;
+    line-height: 1.9;
+}
+
+.page-content h1 {
+    font-size: 2.5rem;
+    font-weight: normal;
+    margin-bottom: 40px;
+    color: var(--accent);
+    text-align: center;
+}
+
+.page-content h2 {
+    font-size: 1.8rem;
+    font-weight: normal;
+    margin: 48px 0 24px;
+}
+
+.page-content p {
+    margin-bottom: 28px;
+}
+
+/* E-Book Section */
+.ebook-grid {
+    display: grid;
+    gap: 32px;
+    margin-top: 40px;
+}
+
+.ebook-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+}
+
+.ebook-card h3 {
+    font-size: 1.5rem;
+    font-weight: normal;
+    margin-bottom: 16px;
+    color: var(--accent);
+}
+
+.ebook-card p {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    header {
+        padding: 60px 0 32px;
+    }
+
+    .site-title {
+        font-size: 1.8rem;
+    }
+
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .post-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .post-title-large {
+        font-size: 1.8rem;
+    }
+
+    .post-meta-info {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    main {
+        padding: 40px 0 60px;
+    }
+
+    .post-content {
+        font-size: 1rem;
+    }
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="site-title">Jaya Klampra</h1>
+            <p class="site-tagline">Every soul will taste of death</p>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../pages/e-buku.html">E-Book</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <article>
+                <div class="post-header">
+                    <h1 class="post-title-large">Maknawi</h1>
+                    <div class="post-meta-info">
+                        <span>📅 30 Januari 2023</span>
+                        <span>🏷️ <span style="color: var(--accent)">#Remember</span></span>
+                    </div>
+                </div>
+
+                <div class="post-content">
+                     <p>Aku mengamati akhir tahun 2022 dan awal tahun 2023.</p> <p>Disana aku menemukan 2 fenomena dimana 2 orang keramat di hinakan.</p> <p>Aku melihat du tahun itu dan dua orang itu bukan hal yang sederhana.</p> <p>Akau akan memulai berhitung dan menjumlahkan angka 2022 = 6 dan 2023 = 7, dan jika 6+7 = 13, datn 13 = 4</p> <p>Apabila saya jumlahkan langsung 2022 + 2023 = 4045 = 13, dan 13 = 4</p> <p>Rahasia apa yang terkandung di balik angka 4 yang membayangi kesialan 2 orang keramat di indonesia ini?</p> <p>Angka 4 sendiri mempunyai makna di banyak tempat, seperti empat adalah sebuah dimensi, atau angka empat adalah simbol pengukuran pondasi.</p> <p>Angka 4 sendiri mempunyai makna banyak, untuk 4 musim, seperti musim panas, musim semi, musim gugur, dan musim salju.</p> <p>Angka 4 mempunyai arti 4 mata angin. Juga dapat diartikan sebagai 4 arah, yaitu utara, selatan, timur dan barat.</p> <p>Ada juga arti sebagai 4 unsur atau 4 elemen, seperti unsur api, air, udara dan bumi. Ada juga beberapa budaya dan agama mempunyai kisah dan arti sendiri mengenai angka 4 ini.</p> <p>Secara general semua angka adalah baik, dalam islam tidak pernah ada pernyataan adanya angka baik dan angka buruk.</p> <p>Salah Satu ayat dalam alquran yang menyinggung angka 4 yaitu dalam Surat ke-9 QS At Taubah ; 2 yang artinya "Sebab itu berjalanlah kamu kaum musyrikin di muka bumi selama 4 bulan dan ketahuilah bahwa sesungguhnya kamu tidak dapat melemahkan Allah dan sesungguhnya Allah menghinakan orang-orang kafir".[kejadian ini ketika Nabi Muhammad SAW membuat sebuah perjanjian dengan orang-orang musyrikin, dan diberi tempo 4 bulan untuk memperkuat diri].&nbsp;</p> <p>Angka 4 juga bermakna kepemimpinan yang tergambar dalam kepemimpinan terbaik pasca Rasulullah, yaitu Khulafaur Rasydin yang berjumlah 4: Abu Bakar As−Shidiq, Umar Bin Khatab, Usman Bin Affan dan Ali Bin Abi Thalib.</p> <p>Namun juga 4 (dibaca empat) adalah sebuah angka, sistem bilangan, dan nama dari glyph yang mewakili angka tersebut. Angka ini merupakan bilangan asli di antara 3 dan 5. Dalam kepercayaan <a href="https://id.m.wikipedia.org/wiki/Cina">Cina</a>, <a href="https://id.m.wikipedia.org/wiki/Jepang">Jepang</a>, dan <a href="https://id.m.wikipedia.org/wiki/Korea">Korea</a>, angka ini sering diangap pembawa kesialan karena pelafalannya juga berarti "mati" dalam <a href="https://id.m.wikipedia.org/wiki/Bahasa_Mandarin">bahasa Mandarin</a>. Penderita <a href="https://id.m.wikipedia.org/wiki/Tetrafobia">tetrafobia</a> sangat mentakuti angka ini.</p> <p>Dari sekian banyak pemaknaan diatas, hanya satu hal yang saya rasakan, dimana kondisi saat ini adalah dimulainya peradaban akhir dan kebangkitan jati diri bangsa yang di kuburkan sekian lama.</p> <p>Sedikit tambahan tentang angka 4 yaitu tentang sedulur papat kalima pancer, Ajaran ini dijelaskan oleh Sunan Kalijaga di dalam salah satu syairnya yang bernama kidung marmati, dalam bahasa Jawa kata kidung,&nbsp; berarti syair atau lirik dan marmati adalah singkatan dari samar mati yang berarti seorang ibu yang mengandung anaknya dan ketika ingin melahirkan dalam keadaan samar akan kematian. Syair ini mengajarkan kita tentang falsafah Jawa “sangkan paraning dumadi” yang artinya asal usul manusia dan dan tujuan hidup menjadi manusia, hal ini sesuai dengan firman Allah QS.Al-A’raf ayat 172 yang berbunyi:</p> <p>وَاِذْ اَخَذَ رَبُّكَ مِنْۢ بَنِيْٓ اٰدَمَ مِنْ ظُهُوْرِهِمْ ذُرِّيَّتَهُمْ وَاَشْهَدَهُمْ عَلٰٓى اَنْفُسِهِمْۚ اَلَسْتُ بِرَبِّكُمْۗ قَالُوْا بَلٰىۛ شَهِدْنَا ۛاَنْ تَقُوْلُوْا يَوْمَ الْقِيٰمَةِ اِنَّا كُنَّا عَنْ هٰذَا غٰفِلِيْنَ</p> <p>“Dan (ingatlah) ketika Tuhanmu mengeluarkan dari sulbi (tulang belakang) anak cucu Adam keturunan mereka dan Allah mengambil kesaksian terhadap roh mereka (seraya berfirman), “Bukankah Aku ini Tuhanmu?” Mereka menjawab, “Betul (Engkau Tuhan kami), kami bersaksi.” (Kami lakukan yang demikian itu) agar di hari Kiamat kamu tidak mengatakan, “Sesungguhnya ketika itu kami lengah terhadap ini.”</p> <p>Firman di atas menerangkan bahwa manusia ketika masih di alam ruh telah disyahadat oleh Allah, dan inilah syahadat pertama manusia sebelum lahir di dunia, akan tetapi ketika telah terlahir di dunia kebanyakan manusia lupa atau lengah dikarenakan hawa nafsunya. Di dalam falsafah jawa “sedulur papat limo pancer” diartikan empat malaikat yaitu malaikat Jibril, malaikat mikail, malaikat isrofil, malaikat izroil yang ditugaskan oleh Allah untuk menjaga kita ketika masih didalam rahim serta dilambangkan berupa air ketuban, plasenta, darah, dan pusar. Dan didalam ajaran Imam Al-Ghazali saudara empat kelima pancer disebut an-nafs atau nafsu, dan di ajaran Sunan Kalijaga yang dimaksud saudara empat yaitu saudara aluamah, saudara supiyah, saudara amarah, saudara mutmainah dan yang dimaksud kelima&nbsp;pancer adalah diri kita sendiri.</p> <p>Pertama, sedulur amarah &nbsp;adalah nafsu yang berkaitan dengan emosi, kekuasaan, tahta, dll. Nafsu ini jika kita tidak bisa mengendalikannya akibatnya akan mudah marah, serakah, sombong, dll, tetapi jika kita bisa mengendalikannya akan sebaliknya menjadikan kita berani mengungkapkan kebenaran atau nahi munkar.</p> <p>Kedua, sedulur supiyah adalah nafsu yang berkaitan dengan keindahan, kekayaan, dll. Nafsu ini jika kita tidak bisa mengendalikannya, maka akan berakibat buruk, seperti iri, dengki, dll. Akan tetapi jika bisa mengendalikannya akan menjadikan kita semakin semangat dalam bekerja untuk menggapai keberkahan dalam hidup.</p> <p>Ketiga, sedulur aluamah adalah nafsu yang berkaitan dengan kebutuhan dasar manusia seperti makan, minum, syahwat, dll. Jika porsi nafsu ini pas, maka akan menjadikan tubuh kita sehat dan sebaliknya jika kita tidak bisa mengendalikannya akibatnya akan buruk seperti jika berlebihan makan akan menjadikan obesitas.</p> <p>Keempat, sedulur mutmainah adalah nafsu yang berkaitan dengan keinginan dalam berbuat kebaikan, nafsu ini adalah nafsu yang baik akan tetapi juga bisa menjadi buruk jika diumbar seperti mementingkan hablumminallah dan lupa hablumminannas. Kelima, pancer yaitu diri kita sendiri jika dapat mengendalikan empat saudara ini kita akan menjadi manusia yang mancapai tingkatan insan kamil, dan sebaliknya jika kita dikendalikan empat saudara ini kita akan lengah dan lalai sebagaimana dijelaskan firman di atas. Di dalam ajaran Islam peracaya bahwa setan berjanji akan selalu menggoda manusia, pada hakikatnya yang setan goda adalah empat saudara ini atau hawa nafsu dan bukan ruh karena ruh manusia pada hakikatnya suci.</p> <p>Wallohualam.</p> <p>Semoga Alloh SWT melindungi kita semua. Aamiin</p> 
+                </div>
+
+                <div style="text-align: center">
+                    <a href="../index.html" class="back-link">&larr; Kembali ke Artikel</a>
+                </div>
+            </article>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Jaya Klampra. Seluruh hak cipta dilindungi.</p>
+        </footer>
+    </div>
+</body>
+</html>
+    
