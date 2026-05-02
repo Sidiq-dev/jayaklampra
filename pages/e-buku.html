@@ -780,8 +780,8 @@
             <h1 class="page-title">E-Book Koleksi</h1>
             <p class="page-subtitle">Tulisan mendalam untuk perjalanan spiritual Anda</p>
 
-            <div class="ebook-grid">
-                <!-- E-Book 1 -->
+            <div class="ebook-grid" id="ebook-grid">
+                <!-- E-Books will be loaded dynamically from ebook.json -->
                 <div class="ebook-card">
                     <div class="ebook-cover">
                         <div class="book-mockup"></div>
@@ -970,7 +970,7 @@
                             <div class="bank-logo">BCA</div>
                             <div class="bank-details">
                                 <p class="bank-number">4561 0128 43</p>
-                                <p class="bank-name">a.n. Jaya Klampra</p>
+                                <p class="bank-name">a.n. Muizz Sidiq</p>
                             </div>
                         </div>
                     </div>
@@ -1050,5 +1050,140 @@
             <p>&copy; 2025 Jaya Klampra. Seluruh hak cipta dilindungi.</p>
         </footer>
     </div>
+
+    <script>
+        // Load ebooks dynamically from JSON
+        async function loadEbooks() {
+            try {
+                const response = await fetch('../admin/data/ebook.json');
+                const ebooks = await response.json();
+
+                const ebookGrid = document.getElementById('ebook-grid');
+
+                if (ebooks && ebooks.length > 0) {
+                    // Clear existing content (keeping the first one as fallback or replace all)
+                    ebookGrid.innerHTML = '';
+
+                    ebooks.forEach((ebook, index) => {
+                        // Format prices
+                        const priceFormatted = ebook.price.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                        const priceOriginalFormatted = ebook.price_original.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+                        // Build features HTML
+                        let featuresHtml = '';
+                        if (ebook.features && ebook.features.length > 0) {
+                            ebook.features.forEach(feature => {
+                                featuresHtml += `<li>${feature}</li>`;
+                            });
+                        } else {
+                            featuresHtml = '<li>Format PDF (Premium)</li><li>Bisa dibaca offline</li>';
+                        }
+
+                        // Build WhatsApp link
+                        const waMessage = encodeURIComponent(`Halo, saya ingin membeli E-Book "${ebook.title}" seharga Rp ${priceFormatted}`);
+                        const waLink = `https://wa.me/${ebook.whatsapp}?text=${waMessage}`;
+
+                        // Create ebook card
+                        const ebookCard = document.createElement('div');
+                        ebookCard.className = 'ebook-card';
+                        ebookCard.innerHTML = `
+                            <div class="ebook-cover">
+                                <div class="book-mockup"></div>
+                            </div>
+                            <div class="ebook-info">
+                                <span class="ebook-tag">${index === 0 ? 'Best Seller' : 'E-Book'}</span>
+                                <h2 class="ebook-title">${ebook.title}</h2>
+                                <p class="ebook-subtitle">${ebook.subtitle || ''}</p>
+
+                                <p class="ebook-description">
+                                    ${ebook.description || ''}
+                                </p>
+
+                                <ul class="ebook-features">
+                                    ${featuresHtml}
+                                </ul>
+
+                                <div class="price-section">
+                                    <div class="price-row">
+                                        <div class="price">
+                                            <span class="price-label">Harga</span>
+                                            <span class="price-value">Rp ${priceFormatted}</span>
+                                            <span class="price-original">Rp ${priceOriginalFormatted}</span>
+                                        </div>
+                                        <a href="#payment-instructions" class="buy-button">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                            </svg>
+                                            Beli Sekarang
+                                        </a>
+                                    </div>
+
+                                    <div class="payment-methods">
+                                        <p class="payment-label">Metode Pembayaran:</p>
+                                        <div class="payment-icons">
+                                            <span class="payment-icon">${ebook.bank_name || 'Bank'} Transfer</span>
+                                            <span class="payment-icon">WhatsApp</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        ebookGrid.appendChild(ebookCard);
+                    });
+
+                    // Update payment instructions with the first ebook's info
+                    if (ebooks.length > 0) {
+                        const firstEbook = ebooks[0];
+                        const priceFormatted = firstEbook.price.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+                        // Update payment step
+                        const stepDescription = document.querySelector('.step-card:nth-child(1) .step-description');
+                        if (stepDescription) {
+                            stepDescription.textContent = `Transfer Rp ${priceFormatted} ke rekening berikut:`;
+                        }
+
+                        // Update bank card
+                        const bankLogo = document.querySelector('.bank-logo');
+                        const bankNumber = document.querySelector('.bank-number');
+                        const bankName = document.querySelector('.bank-name');
+
+                        if (bankLogo) bankLogo.textContent = firstEbook.bank_name || 'BCA';
+                        if (bankNumber) bankNumber.textContent = firstEbook.bank_number || '4561 0128 43';
+                        if (bankName) bankName.textContent = `a.n. ${firstEbook.bank_owner || 'Muizz Sidiq'}`;
+
+                        // Update format text
+                        const formatText = document.querySelector('.format-text');
+                        if (formatText && firstEbook.title) {
+                            formatText.innerHTML = `
+                                Halo, saya sudah transfer Rp ${priceFormatted} untuk E-Book "${firstEbook.title}".<br>
+                                Nama: [Nama Anda]<br>
+                                Tanggal: [Tanggal transfer]<br>
+                                Email: [Email untuk pengiriman file]
+                            `;
+                        }
+
+                        // Update WhatsApp button
+                        const waButton = document.querySelector('.whatsapp-button');
+                        if (waButton) {
+                            const waMessage = encodeURIComponent(`Halo, saya ingin membeli E-Book "${firstEbook.title}" seharga Rp ${priceFormatted}`);
+                            waButton.href = `https://wa.me/${firstEbook.whatsapp}?text=${waMessage}`;
+                        }
+
+                        // Update CTA price
+                        const ctaPrimary = document.querySelector('.cta-primary');
+                        if (ctaPrimary && firstEbook.title) {
+                            ctaPrimary.textContent = `Beli Sekarang - Rp ${priceFormatted}`;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('Could not load ebook data, using default content');
+            }
+        }
+
+        // Load ebooks when page is ready
+        document.addEventListener('DOMContentLoaded', loadEbooks);
+    </script>
 </body>
 </html>

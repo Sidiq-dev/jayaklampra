@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ post.title }} - Preview</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-primary: #0a0a0c;
+            --bg-secondary: #111113;
+            --bg-card: #161618;
+            --text-primary: #e8e6e3;
+            --text-secondary: #9b9a97;
+            --accent: #c9a87c;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+        body {
+            font-family: 'Georgia', serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.8;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+        .preview-header {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 16px 24px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .preview-badge {
+            background: var(--accent);
+            color: var(--bg-primary);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+        .back-link:hover { color: var(--accent); }
+        .post-title {
+            font-size: 2rem;
+            margin-bottom: 16px;
+            color: var(--accent);
+        }
+        .post-meta {
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        .post-content {
+            font-size: 1.05rem;
+        }
+        .post-content p { margin-bottom: 16px; }
+        .post-content h2 { color: var(--accent); margin: 32px 0 16px; }
+        .post-content img { max-width: 100%; border-radius: 8px; margin: 24px 0; }
+        .post-content blockquote {
+            border-left: 3px solid var(--accent);
+            padding-left: 20px;
+            margin: 24px 0;
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+        .featured-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 32px;
+        }
+        .no-image {
+            background: var(--bg-card);
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 3rem;
+            margin-bottom: 32px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="preview-header">
+            <span class="preview-badge">PREVIEW MODE</span>
+            <a href="javascript:window.close()" class="back-link">Tutup</a>
+        </div>
+
+        <article>
+            <h1 class="post-title">{{ post.title }}</h1>
+            <div class="post-meta">
+                📅 {{ post.pub_date }}{% if post.categories %} | 🏷️ {{ post.categories|join(', ') }}{% endif %}
+            </div>
+            <div class="post-content">
+                {{ post.content|safe }}
+            </div>
+        </article>
+    </div>
+
+    <script>
+        // Fix image paths for preview
+        document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('.post-content img');
+            images.forEach(function(img) {
+                const src = img.getAttribute('src');
+                if (src && src.startsWith('images/')) {
+                    img.src = '../' + src;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

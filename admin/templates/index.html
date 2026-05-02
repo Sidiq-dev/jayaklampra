@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Jaya Klampra</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0c;
+            --bg-secondary: #111113;
+            --bg-card: #161618;
+            --text-primary: #e8e6e3;
+            --text-secondary: #9b9a97;
+            --accent: #c9a87c;
+            --accent-glow: rgba(201, 168, 124, 0.1);
+            --border: rgba(255, 255, 255, 0.08);
+            --success: #4ade80;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        .header {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .logo span {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(201, 168, 124, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--bg-primary);
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: 0.85rem;
+        }
+
+        /* Flash Messages */
+        .flash {
+            padding: 16px 24px;
+            margin: 24px 0;
+            border-radius: 8px;
+        }
+
+        .flash.success {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .flash.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        /* Content */
+        .content {
+            padding: 40px 0;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: var(--accent);
+            margin-bottom: 24px;
+        }
+
+        /* Posts Grid */
+        .posts-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .post-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s;
+        }
+
+        .post-item:hover {
+            border-color: var(--accent);
+        }
+
+        .post-info {
+            flex: 1;
+        }
+
+        .post-title {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .post-title a {
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .post-title a:hover {
+            color: var(--accent);
+        }
+
+        .post-meta {
+            display: flex;
+            gap: 16px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 24px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .post-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .post-actions {
+                width: 100%;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                Jaya Klampra <span>Admin</span>
+            </div>
+            <div class="header-actions">
+                <a href="/ebook" class="btn btn-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    E-Books
+                </a>
+                <a href="/import-wp" class="btn btn-secondary" onclick="return confirm('Import dari WordPress akan menimpa data existing. Lanjutkan?')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    Import WP
+                </a>
+                <a href="/generate" class="btn btn-success" onclick="return confirm('Generate website akan memperbarui file HTML. Lanjutkan?')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Generate Website
+                </a>
+                <a href="/new" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Post Baru
+                </a>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="content">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value">{{ posts|length }}</div>
+                    <div class="stat-label">Total Posts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ ebooks|length }}</div>
+                    <div class="stat-label">E-Books</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">{{ posts|selectattr('categories')|list|length }}</div>
+                    <div class="stat-label">Dengan Kategori</div>
+                </div>
+            </div>
+
+            <h2 class="section-title">Semua Postingan</h2>
+
+            {% if posts %}
+                <div class="posts-grid">
+                    {% for post in posts %}
+                        <div class="post-item">
+                            <div class="post-info">
+                                <div class="post-title">
+                                    <a href="/preview/{{ post.slug }}" target="_blank">{{ post.title }}</a>
+                                </div>
+                                <div class="post-meta">
+                                    <span>📅 {{ post.pub_date|date_display }}</span>
+                                    {% if post.categories %}
+                                        <span>🏷️ {{ post.categories|join(', ') }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="post-actions">
+                                <a href="/preview/{{ post.slug }}" target="_blank" class="btn btn-secondary btn-sm">Preview</a>
+                                <a href="/edit/{{ post.slug }}" class="btn btn-primary btn-sm">Edit</a>
+                                <a href="/delete/{{ post.slug }}" class="btn btn-danger btn-sm" onclick="return confirm('Hapus post ini?')">×</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p>Belum ada postingan</p>
+                    <p style="margin-top: 8px; font-size: 0.9rem;">Klik "Import WP" untuk import dari WordPress atau "Post Baru" untuk membuat manual</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="footer">
+            <p>
+                <a href="../index.html" target="_blank">Lihat Website →</a>
+                &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+                Jaya Klampra Admin CMS v1.0
+            </p>
+        </div>
+    </div>
+</body>
+</html>

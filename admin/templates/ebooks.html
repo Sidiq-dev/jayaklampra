@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Books - Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0c;
+            --bg-secondary: #111113;
+            --bg-card: #161618;
+            --text-primary: #e8e6e3;
+            --text-secondary: #9b9a97;
+            --accent: #c9a87c;
+            --accent-glow: rgba(201, 168, 124, 0.1);
+            --border: rgba(255, 255, 255, 0.08);
+            --success: #4ade80;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .header {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        .content {
+            padding: 40px 0;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(201, 168, 124, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-danger {
+            background: var(--error);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: 0.85rem;
+        }
+
+        .ebooks-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .ebook-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            display: grid;
+            grid-template-columns: 120px 1fr auto;
+            gap: 20px;
+            transition: all 0.3s;
+            align-items: center;
+        }
+
+        .ebook-cover-thumb {
+            width: 120px;
+            height: 160px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ebook-cover-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .ebook-cover-thumb span {
+            color: var(--text-secondary);
+            font-size: 2rem;
+        }
+
+        .ebook-item:hover {
+            border-color: var(--accent);
+        }
+
+        .ebook-info {
+            flex: 1;
+        }
+
+        .ebook-title {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .ebook-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            font-style: italic;
+        }
+
+        .ebook-meta {
+            display: flex;
+            gap: 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 12px;
+        }
+
+        .ebook-price {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .ebook-actions {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .flash {
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            border-radius: 8px;
+        }
+
+        .flash.success {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .flash.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        @media (max-width: 768px) {
+            .ebook-item {
+                grid-template-columns: 80px 1fr;
+            }
+
+            .ebook-cover-thumb {
+                width: 80px;
+                height: 100px;
+            }
+
+            .ebook-actions {
+                grid-column: 1 / -1;
+            }
+
+            .ebook-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">E-Books Management</div>
+            <a href="/" class="back-link">← Kembali ke Dashboard</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="content">
+            <div class="page-header">
+                <h1 class="page-title">Daftar E-Books</h1>
+                <a href="/ebook/new" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Tambah E-Book Baru
+                </a>
+            </div>
+
+            {% if ebooks %}
+                <div class="ebooks-grid">
+                    {% for ebook in ebooks %}
+                        <div class="ebook-item">
+                            <div class="ebook-cover-thumb">
+                                {% if ebook.cover_image %}
+                                    <img src="../images/{{ ebook.cover_image }}" alt="{{ ebook.title }}">
+                                {% else %}
+                                    <span>📖</span>
+                                {% endif %}
+                            </div>
+                            <div class="ebook-info">
+                                <div class="ebook-title">{{ ebook.title }}</div>
+                                <div class="ebook-subtitle">{{ ebook.subtitle }}</div>
+                                <div class="ebook-meta">
+                                    <span class="ebook-price">Rp {{ ebook.price|int|formatPrice }}</span>
+                                    {% if ebook.bank_name %}
+                                        <span>{{ ebook.bank_name }} - {{ ebook.bank_number }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="ebook-actions">
+                                <a href="/ebook/edit/{{ ebook.id }}" class="btn btn-secondary btn-sm">Edit</a>
+                                <a href="/ebook/delete/{{ ebook.id }}" class="btn btn-danger btn-sm" onclick="return confirm('Hapus e-book ini?')">×</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    <p>Belum ada e-book</p>
+                    <p style="margin-top: 8px; font-size: 0.9rem;">Klik "Tambah E-Book Baru" untuk membuat e-book pertama</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

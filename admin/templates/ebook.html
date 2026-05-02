@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Book Settings - Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0c;
+            --bg-secondary: #111113;
+            --bg-card: #161618;
+            --text-primary: #e8e6e3;
+            --text-secondary: #9b9a97;
+            --accent: #c9a87c;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .header {
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            color: var(--accent);
+        }
+
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        .content {
+            padding: 40px 0;
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            margin-bottom: 32px;
+            color: var(--accent);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(201, 168, 124, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .help-text {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .preview-box {
+            background: var(--bg-secondary);
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+
+        .preview-box p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .flash {
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            border-radius: 8px;
+        }
+
+        .flash.success {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid #4ade80;
+            color: #4ade80;
+        }
+
+        .flash.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">E-Book Settings</div>
+            <a href="/" class="back-link">← Kembali ke Dashboard</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="content">
+            <h1 class="form-title">Pengaturan E-Book</h1>
+
+            <form method="post" action="/ebook/save">
+
+                <!-- Info Buku -->
+                <div class="section">
+                    <h2 class="section-title">Informasi Buku</h2>
+
+                    <div class="form-group">
+                        <label for="title">Judul E-Book</label>
+                        <input type="text" id="title" name="title" value="{{ ebook.title }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subtitle">Subjudul</label>
+                        <input type="text" id="subtitle" name="subtitle" value="{{ ebook.subtitle }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Deskripsi</label>
+                        <textarea id="description" name="description">{{ ebook.description }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Harga -->
+                <div class="section">
+                    <h2 class="section-title">Harga</h2>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="price">Harga Jual (Rp)</label>
+                            <input type="number" id="price" name="price" value="{{ ebook.price }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="price_original">Harga Coret (Rp)</label>
+                            <input type="number" id="price_original" name="price_original" value="{{ ebook.price_original }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pembayaran -->
+                <div class="section">
+                    <h2 class="section-title">Info Pembayaran</h2>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bank_name">Nama Bank</label>
+                            <input type="text" id="bank_name" name="bank_name" value="{{ ebook.bank_name }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="bank_number">Nomor Rekening</label>
+                            <input type="text" id="bank_number" name="bank_number" value="{{ ebook.bank_number }}">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bank_owner">Atas Nama</label>
+                        <input type="text" id="bank_owner" name="bank_owner" value="{{ ebook.bank_owner }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="whatsapp">Nomor WhatsApp (untuk konfirmasi)</label>
+                        <input type="text" id="whatsapp" name="whatsapp" value="{{ ebook.whatsapp }}" placeholder="628123456789">
+                        <p class="help-text">Format: 628... (tanpa + atau 0 di depan)</p>
+                    </div>
+                </div>
+
+                <div class="preview-box">
+                    <p>⚠️ Setelah disimpan, halaman e-buku.html akan otomatis diupdate dengan data baru.</p>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    <a href="/" class="btn btn-secondary">Batal</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
