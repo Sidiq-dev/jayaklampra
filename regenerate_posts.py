@@ -60,7 +60,20 @@ for item in root.findall('.//item'):
     post_id = post_id_elem.text if post_id_elem is not None else ''
 
     post_name_elem = item.find('wp:post_name', ns)
-    slug = post_name_elem.text if post_name_elem is not None and post_name_elem.text else f'{post_type}-{post_id}'
+    slug = post_name_elem.text if post_name_elem is not None and post_name_elem.text else ''
+
+    # If slug is empty or just a number, generate from title
+    if not slug or slug.isdigit():
+        # Generate slug from title
+        title_clean = html.unescape(title).lower()
+        # Remove special characters and replace with hyphens
+        title_clean = re.sub(r'[^\w\s-]', '', title_clean)
+        title_clean = re.sub(r'[\s_]+', '-', title_clean)
+        title_clean = title_clean.strip('-')
+        # Limit length
+        slug = title_clean[:100] if title_clean else f'{post_type}-{post_id}'
+        # Remove any non-ASCII characters
+        slug = slug.encode('ascii', 'ignore').decode('ascii')
 
     # Get categories
     categories = []
