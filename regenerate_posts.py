@@ -4,6 +4,8 @@ import re
 from datetime import datetime
 import os
 import shutil
+import requests
+from urllib.parse import urlparse
 
 # Parse WordPress export
 tree = ET.parse(r'C:\Users\LENOVO\Downloads\jayaklampra.WordPress.2026-05-01.xml')
@@ -19,6 +21,7 @@ ns = {
 
 posts = []
 pages = []
+attachments = []  # Store all attachment URLs
 
 # Find all items
 for item in root.findall('.//item'):
@@ -36,12 +39,15 @@ for item in root.findall('.//item'):
     else:
         status = status.text
 
-    # Skip non-published posts (but keep all pages)
-    if post_type == 'post' and status != 'publish':
+    # Collect attachments for downloading
+    if post_type == 'attachment':
+        attachment_url_elem = item.find('wp:attachment_url', ns)
+        if attachment_url_elem is not None and attachment_url_elem.text:
+            attachments.append(attachment_url_elem.text)
         continue
 
-    # Skip attachments
-    if post_type == 'attachment':
+    # Skip non-published posts (but keep all pages)
+    if post_type == 'post' and status != 'publish':
         continue
 
     title_elem = item.find('title')
@@ -82,11 +88,19 @@ for item in root.findall('.//item'):
         if cat_text and cat_text not in ['Uncategorized', 'Tidak Dikategorikan']:
             categories.append(cat_text)
 
+    # Parse date for proper sorting
+    parsed_date = None
+    try:
+        parsed_date = datetime.strptime(pub_date, '%a, %d %b %Y %H:%M:%S %z')
+    except:
+        pass
+
     data = {
         'title': html.unescape(title),
         'content': content,
         'excerpt': excerpt,
         'pub_date': pub_date,
+        'parsed_date': parsed_date,
         'id': post_id,
         'slug': slug,
         'categories': categories,
@@ -98,20 +112,64 @@ for item in root.findall('.//item'):
     elif post_type == 'page':
         pages.append(data)
 
-# Sort posts by date (newest first)
-posts.sort(key=lambda x: x['pub_date'], reverse=True)
+# Sort posts by PARSED date (newest first) - posts without dates go last
+posts.sort(key=lambda x: (x['parsed_date'] is not None, x['parsed_date'] or datetime.min), reverse=True)
 
 print(f"Total posts found: {len(posts)}")
 print(f"Total pages found: {len(pages)}")
+print(f"Total attachments found: {len(attachments)}")
 
 # Print all posts with dates to debug
-print("\n=== ALL POSTS WITH DATES ===")
+print("\n=== ALL POSTS WITH DATES (SORTED) ===")
 for p in posts:
     date_str = p['pub_date'][:16] if len(p['pub_date']) > 16 else p['pub_date']
-    print(f"{date_str} | {p['title']} (slug: {p['slug']})")
+    year = p['parsed_date'].year if p['parsed_date'] else '????'
+    print(f"{date_str} ({year}) | {p['title']} (slug: {p['slug']})")
 
-# Import the CSS and HTML generation functions from the previous script
+# Download images from WordPress
 output_dir = r'C:\Users\LENOVO\jayaklampra-site'
+images_dir = os.path.join(output_dir, 'images')
+
+os.makedirs(images_dir, exist_ok=True)
+
+def download_image(url):
+    """Download image from WordPress.com if not exists locally"""
+    # Remove query parameters
+    url = url.split('?')[0]
+    filename = os.path.basename(urlparse(url).path)
+    local_path = os.path.join(images_dir, filename)
+
+    if os.path.exists(local_path):
+        return f"images/{filename}"
+
+    try:
+        print(f"Downloading: {filename}")
+        response = requests.get(url, timeout=30)
+        if response.status_code == 200:
+            with open(local_path, 'wb') as f:
+                f.write(response.content)
+            return f"images/{filename}"
+    except Exception as e:
+        print(f"Failed to download {filename}: {e}")
+
+    return None
+
+# Download all attachments
+print(f"\n=== DOWNLOADING IMAGES ===")
+for url in attachments:
+    download_image(url)
+
+# Also find and download images embedded in post content
+all_image_urls = set()
+for post in posts:
+    img_urls = re.findall(r'<img[^>]+src="([^"]+)"', post['content'])
+    for img_url in img_urls:
+        if 'wordpress.com' in img_url or 'files.wordpress.com' in img_url:
+            all_image_urls.add(img_url.split('?')[0])
+
+print(f"\nFound {len(all_image_urls)} unique images in posts")
+for url in all_image_urls:
+    download_image(url)
 
 # Clean WordPress content
 def clean_wp_content(content):
@@ -131,15 +189,13 @@ def clean_wp_content(content):
 
     return content
 
-def format_date(date_str):
+def format_date(date_str, parsed_date):
     """Format date to Indonesian format"""
-    try:
-        dt = datetime.strptime(date_str, '%a, %d %b %Y %H:%M:%S %z')
+    if parsed_date:
         months = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
                   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
-        return f"{dt.day} {months[dt.month]} {dt.year}"
-    except:
-        return date_str
+        return f"{parsed_date.day} {months[parsed_date.month]} {parsed_date.year}"
+    return date_str
 
 # Read the existing CSS from index.html
 with open(os.path.join(output_dir, 'index.html'), 'r', encoding='utf-8') as f:
@@ -192,12 +248,10 @@ index_html = f'''<!DOCTYPE html>
 def get_featured_image(post):
     images = re.findall(r'<img[^>]+src="([^"]+)"', post['content'])
     for img_url in images:
-        # Check if image is from the site (local)
         if 'wordpress.com' in img_url or 'files.wordpress.com' in img_url:
-            # Get filename
             filename = os.path.basename(img_url.split('?')[0])
-            # Check if file exists in images folder
-            if os.path.exists(os.path.join(output_dir, 'images', filename)):
+            local_path = os.path.join(images_dir, filename)
+            if os.path.exists(local_path):
                 return f"images/{filename}"
     return None
 
@@ -217,7 +271,7 @@ for post in posts:
     # Clean excerpt from HTML
     excerpt = re.sub(r'<[^>]+>', '', excerpt)
 
-    date_str = format_date(post['pub_date'])
+    date_str = format_date(post['pub_date'], post['parsed_date'])
     category = post['categories'][0] if post['categories'] else 'Umum'
 
     # Get featured image
@@ -268,7 +322,7 @@ print(f"\nCreated updated index.html")
 for post in posts:
     content = clean_wp_content(post['content'])
     title = post['title']
-    date_str = format_date(post['pub_date'])
+    date_str = format_date(post['pub_date'], post['parsed_date'])
     slug = post['slug']
 
     categories_html = ''
@@ -335,4 +389,5 @@ print(f"Created {len(posts)} post pages")
 
 print("\n=== DONE! ===")
 print(f"Total posts: {len(posts)}")
-print("Please check the posts above to confirm all 2024-2026 posts are included!")
+print("Posts are now sorted by date (newest first) with 2026 posts at the top!")
+print("Images from WordPress have been downloaded to the images folder.")
