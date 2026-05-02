@@ -35,13 +35,27 @@ def clean_wp_content(content, for_post_page=False):
     content = re.sub(r'<!-- /wp:.*?-->', '', content)
 
     # Convert WordPress figure galleries to simple images
-    content = re.sub(r'<figure class="wp-block-image[^"]*".*?<img (src="[^"]+)"[^>]*>.*?</figure>', r'<img src="\1" alt="">', content, flags=re.DOTALL)
+    # Fixed: capture only the URL, not src=" part
+    content = re.sub(r'<figure class="wp-block-image[^"]*".*?<img src="([^"]+)"[^>]*>.*?</figure>', r'<img src="\1" alt="">', content, flags=re.DOTALL)
     content = re.sub(r'<figure[^>]*>(.*?)</figure>', r'\1', content, flags=re.DOTALL)
 
-    # Fix image paths for post pages (files are in posts/ subdirectory)
-    if for_post_page:
-        # Convert images/ to ../images/ for post pages
-        content = re.sub(r'src="images/', 'src="../images/', content)
+    # Convert WordPress URLs to local paths if file exists
+    def convert_wp_image(match):
+        img_url = match.group(1)
+        if 'wordpress.com' in img_url or 'files.wordpress.com' in img_url:
+            filename = os.path.basename(img_url.split('?')[0])
+            images_dir = os.path.join(OUTPUT_DIR, 'images')
+            if os.path.exists(os.path.join(images_dir, filename)):
+                # Return path with correct prefix
+                prefix = '../images/' if for_post_page else 'images/'
+                return f'src="{prefix}{filename}"'
+        # Return original if no local file
+        prefix = '../images/' if for_post_page else 'images/'
+        if img_url.startswith('images/'):
+            return f'src="{prefix}{img_url.replace("images/", "")}"'
+        return f'src="{img_url}"'
+
+    content = re.sub(r'src="([^"]+)"', convert_wp_image, content)
 
     return content
 
