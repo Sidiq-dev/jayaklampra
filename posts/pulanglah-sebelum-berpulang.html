@@ -38,9 +38,31 @@ body {
 
 /* Header */
 header {
-    padding: 80px 0 40px;
+    padding: 60px 0 40px;
     text-align: center;
     border-bottom: 1px solid var(--border);
+}
+
+.site-logo {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(201, 168, 124, 0.3);
+    border: 3px solid var(--accent);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.site-logo:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 50px rgba(201, 168, 124, 0.4);
+}
+
+.site-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .site-title {
@@ -463,6 +485,9 @@ footer {
 <body>
     <div class="container">
         <header>
+            <div class="site-logo">
+                <img src="../images/cropped-huhuhuhuhuhuhuh.jpeg" alt="Jaya Klampra Logo">
+            </div>
             <h1 class="site-title">Jaya Klampra</h1>
             <p class="site-tagline">Every soul will taste of death</p>
         </header>
@@ -485,7 +510,9 @@ footer {
                 </div>
 
                 <div class="post-content">
-                     <p>Wahai jiwa yang lelah dan tak berarah<br>Ketika skantung darah berdetak merajah lajur darah<br>Derai hujan yang tersapukan ketujuh fikir dan ketujuh rasa yang membara megah<br>Tentang sebuah kilatan cahaya yang kian menerkam kekosongan<br>Tentang setiap celah dan rongga yang terukirkan sebuah asma terus memanggil<br>Ketahuilah yang menginjak dan terinjak itu wujud yang tak berwujud ialah bayangan yang membelenggu<br>Kembalilah keasalmu dimana tempat keabadianmu dengan mengendarai keridhoanmu.</p> 
+                    
+<p>Wahai jiwa yang lelah dan tak berarah<br>Ketika skantung darah berdetak merajah lajur darah<br>Derai hujan yang tersapukan ketujuh fikir dan ketujuh rasa yang membara megah<br>Tentang sebuah kilatan cahaya yang kian menerkam kekosongan<br>Tentang setiap celah dan rongga yang terukirkan sebuah asma terus memanggil<br>Ketahuilah yang menginjak dan terinjak itu wujud yang tak berwujud ialah bayangan yang membelenggu<br>Kembalilah keasalmu dimana tempat keabadianmu dengan mengendarai keridhoanmu.</p>
+
                 </div>
 
                 <div style="text-align: center">
