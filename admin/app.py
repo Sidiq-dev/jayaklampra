@@ -3,7 +3,7 @@ Jaya Klampra - Admin CMS
 Dashboard sederhana untuk mengelola postingan website
 """
 
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
 import json
 import os
 import re
@@ -241,6 +241,11 @@ def upload_image():
 
     return jsonify({'success': True, 'filename': unique_filename})
 
+@app.route('/images/<path:filename>')
+def serve_image(filename):
+    """Serve images from the images folder"""
+    return send_from_directory(IMAGES_DIR, filename)
+
 @app.route('/import-wp')
 def import_wp():
     """Import posts from WordPress export"""
@@ -412,7 +417,7 @@ def update_ebook_html_all():
 
     # Read the base template (we need to preserve the structure)
     with open(ebook_page, 'r', encoding='utf-8') as f:
-        content = f.read()
+        lines = f.readlines()
 
     # Generate ebook cards HTML
     ebook_cards_html = ''
@@ -435,8 +440,7 @@ def update_ebook_html_all():
         else:
             cover_html = '<div class="book-mockup"></div>'
 
-        ebook_cards_html += f'''
-                <div class="ebook-card">
+        ebook_cards_html += f'''                <div class="ebook-card">
                     <div class="ebook-cover">
                         {cover_html}
                     </div>
@@ -477,12 +481,12 @@ def update_ebook_html_all():
                             </div>
                         </div>
                     </div>
-                </div>'''
+                </div>
+'''
 
     # If no ebooks, add placeholder
     if not ebooks:
-        ebook_cards_html = '''
-                <div class="ebook-card" style="opacity: 0.6; border-style: dashed;">
+        ebook_cards_html = '''                <div class="ebook-card" style="opacity: 0.6; border-style: dashed;">
                     <div class="ebook-cover" style="background: var(--bg-secondary);">
                         <div style="font-size: 3rem; color: var(--text-secondary);"></div>
                     </div>
@@ -495,68 +499,89 @@ def update_ebook_html_all():
                             sedang disusun. Nantikan update terbaru.
                         </p>
                     </div>
-                </div>'''
+                </div>
+'''
 
-    # Replace ebook-grid content
-    pattern = r'(<div class="ebook-grid">)(.*?)(</div>)'
-    content = re.sub(pattern, r'\1\n' + ebook_cards_html + '\n                \3', content, flags=re.DOTALL)
+    # Find and replace ebook-grid content by line numbers
+    # This approach is more reliable than regex for nested divs
+    grid_start_idx = None
+    grid_end_idx = None
+    depth = 0
 
-    # Update payment instructions with first ebook's info (or last modified)
-    if ebooks:
-        ebook = ebooks[-1]  # Use the most recently added/edited ebook
-        price_formatted = f"{int(ebook['price']):,}".replace(',', '.')
+    for i, line in enumerate(lines):
+        if '<div class="ebook-grid"' in line:
+            grid_start_idx = i
+            depth = 1
+        elif grid_start_idx is not None:
+            depth += line.count('<div') - line.count('</div>')
+            if depth == 0:
+                grid_end_idx = i
+                break
 
-        # Update price in payment section
-        content = re.sub(
-            r'Transfer Rp ([\d\.]+) ke',
-            f'Transfer Rp {price_formatted} ke',
-            content
-        )
+    if grid_start_idx is not None and grid_end_idx is not None:
+        # Keep the opening div line, replace content, keep closing div
+        new_lines = lines[:grid_start_idx + 1]
+        new_lines.append(ebook_cards_html)
+        new_lines.append('            </div>\n')
+        new_lines.extend(lines[grid_end_idx + 1:])
+        content = ''.join(new_lines)
 
-        # Update bank info
-        content = re.sub(
-            r'<div class="bank-logo">[^<]*</div>',
-            f'<div class="bank-logo">{ebook["bank_name"]}</div>',
-            content
-        )
-        content = re.sub(
-            r'<p class="bank-number">[^<]*</p>',
-            f'<p class="bank-number">{ebook["bank_number"]}</p>',
-            content
-        )
-        content = re.sub(
-            r'<p class="bank-name">[^<]*</p>',
-            f'<p class="bank-name">a.n. {ebook["bank_owner"]}</p>',
-            content
-        )
+        # Update payment instructions with first ebook's info
+        if ebooks:
+            ebook = ebooks[-1]  # Use the most recently added/edited ebook
+            price_formatted = f"{int(ebook['price']):,}".replace(',', '.')
 
-        # Update WhatsApp links
-        whatsapp_msg = f'Halo,%20saya%20ingin%20membeli%20E-Book%20%22{ebook["title"].replace(" ", "%20")}%22%20seharga%20Rp%20{price_formatted.replace(".", "")}'
-        whatsapp_link = f'href="https://wa.me/{ebook["whatsapp"]}?text={whatsapp_msg}"'
+            # Update price in payment section
+            content = re.sub(
+                r'Transfer Rp ([\d\.]+) ke',
+                f'Transfer Rp {price_formatted} ke',
+                content
+            )
 
-        # Update WhatsApp links in various places
-        content = re.sub(
-            r'href="https://wa\.me/[^"]*"',
-            whatsapp_link,
-            content
-        )
+            # Update bank info
+            content = re.sub(
+                r'<div class="bank-logo">[^<]*</div>',
+                f'<div class="bank-logo">{ebook["bank_name"]}</div>',
+                content
+            )
+            content = re.sub(
+                r'<p class="bank-number">[^<]*</p>',
+                f'<p class="bank-number">{ebook["bank_number"]}</p>',
+                content
+            )
+            content = re.sub(
+                r'<p class="bank-name">[^<]*</p>',
+                f'<p class="bank-name">a.n. {ebook["bank_owner"]}</p>',
+                content
+            )
 
-        # Update format text with current ebook title
-        content = re.sub(
-            r'untuk E-Book "[^"]*"',
-            f'untuk E-Book "{ebook["title"]}"',
-            content
-        )
+            # Update WhatsApp links
+            whatsapp_msg = f'Halo,%20saya%20ingin%20membeli%20E-Book%20%22{ebook["title"].replace(" ", "%20")}%22%20seharga%20Rp%20{price_formatted.replace(".", "")}'
+            whatsapp_link = f'href="https://wa.me/{ebook["whatsapp"]}?text={whatsapp_msg}"'
 
-        # Update CTA price
-        content = re.sub(
-            r'Beli Sekarang - Rp [\d\.]+',
-            f'Beli Sekarang - Rp {price_formatted}',
-            content
-        )
+            # Update WhatsApp links in various places
+            content = re.sub(
+                r'href="https://wa\.me/[^"]*"',
+                whatsapp_link,
+                content
+            )
 
-    with open(ebook_page, 'w', encoding='utf-8') as f:
-        f.write(content)
+            # Update format text with current ebook title
+            content = re.sub(
+                r'untuk E-Book "[^"]*"',
+                f'untuk E-Book "{ebook["title"]}"',
+                content
+            )
+
+            # Update CTA price
+            content = re.sub(
+                r'Beli Sekarang - Rp [\d\.]+',
+                f'Beli Sekarang - Rp {price_formatted}',
+                content
+            )
+
+        with open(ebook_page, 'w', encoding='utf-8') as f:
+            f.write(content)
 
 # Template filters
 @app.template_filter('date_display')

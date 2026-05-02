@@ -247,7 +247,7 @@
                         <p class="help-text">Upload gambar sampul buku (JPG/PNG, max 5MB)</p>
 
                         <div id="cover_preview" style="margin-top: 16px; {% if not ebook or not ebook.cover_image %}display: none;{% endif %}">
-                            <img id="preview_img" src="{% if ebook and ebook.cover_image %}../images/{{ ebook.cover_image }}{% endif %}" alt="Preview Sampul" style="max-width: 200px; border-radius: 8px; border: 2px solid var(--border);">
+                            <img id="preview_img" src="{% if ebook and ebook.cover_image %}/images/{{ ebook.cover_image }}{% endif %}" alt="Preview Sampul" style="max-width: 200px; border-radius: 8px; border: 2px solid var(--border);">
                         </div>
                     </div>
 
