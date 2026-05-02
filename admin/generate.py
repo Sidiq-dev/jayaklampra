@@ -25,7 +25,8 @@ def load_posts():
     return []
 
 
-def clean_wp_content(content):
+def clean_wp_content(content, for_post_page=False):
+    """Clean WordPress content and optionally fix image paths for post pages"""
     if not content:
         return ''
 
@@ -36,6 +37,11 @@ def clean_wp_content(content):
     # Convert WordPress figure galleries to simple images
     content = re.sub(r'<figure class="wp-block-image[^"]*".*?<img (src="[^"]+)"[^>]*>.*?</figure>', r'<img src="\1" alt="">', content, flags=re.DOTALL)
     content = re.sub(r'<figure[^>]*>(.*?)</figure>', r'\1', content, flags=re.DOTALL)
+
+    # Fix image paths for post pages (files are in posts/ subdirectory)
+    if for_post_page:
+        # Convert images/ to ../images/ for post pages
+        content = re.sub(r'src="images/', 'src="../images/', content)
 
     return content
 
@@ -52,7 +58,18 @@ def format_date(date_str):
 
 
 def get_featured_image(post):
+    """Get featured image from post content"""
     images = re.findall(r'<img[^>]+src="([^"]+)"', post.get('content', ''))
+
+    # First check for local images (images/filename.ext)
+    for img_url in images:
+        if img_url.startswith('images/'):
+            filename = img_url.replace('images/', '')
+            images_dir = os.path.join(OUTPUT_DIR, 'images')
+            if os.path.exists(os.path.join(images_dir, filename)):
+                return img_url  # Return as-is since it's already correct path
+
+    # Then check for WordPress images
     for img_url in images:
         if 'wordpress.com' in img_url or 'files.wordpress.com' in img_url:
             filename = os.path.basename(img_url.split('?')[0])
@@ -69,8 +86,16 @@ def generate_site():
     if not posts:
         return "Tidak ada post untuk digenerate!"
 
-    # Sort posts by date (newest first)
-    posts_sorted = sorted(posts, key=lambda x: x.get('pub_date', ''), reverse=True)
+    # Sort posts by parsed date (newest first) - same logic as dashboard
+    def get_date_sort_key(post):
+        pub_date = post.get('pub_date', '')
+        try:
+            dt = datetime.strptime(pub_date, '%a, %d %b %Y %H:%M:%S %z')
+            return dt.timestamp()
+        except:
+            return 0
+
+    posts_sorted = sorted(posts, key=get_date_sort_key, reverse=True)
 
     # Read existing CSS from index.html
     index_path = os.path.join(OUTPUT_DIR, 'index.html')
@@ -123,7 +148,7 @@ def generate_site():
         # Get excerpt
         excerpt = post.get('excerpt', '')
         if not excerpt or len(excerpt) < 10:
-            content_clean = clean_wp_content(post.get('content', ''))
+            content_clean = clean_wp_content(post.get('content', ''), for_post_page=False)
             p_match = re.search(r'<p>([^<]+)</p>', content_clean)
             if p_match:
                 excerpt = p_match.group(1)[:200] + '...'
@@ -181,7 +206,7 @@ def generate_site():
 
     # Create individual post pages
     for post in posts:
-        content = clean_wp_content(post.get('content', ''))
+        content = clean_wp_content(post.get('content', ''), for_post_page=True)
         title = post.get('title', '')
         date_str = format_date(post.get('pub_date', ''))
         slug = post.get('slug', 'post')

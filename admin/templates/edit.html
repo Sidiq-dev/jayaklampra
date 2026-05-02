@@ -68,6 +68,7 @@
         .form-title {
             font-size: 1.5rem;
             margin-bottom: 32px;
+            color: var(--accent);
         }
 
         .form-group {
@@ -164,38 +165,18 @@
             border-color: var(--accent);
         }
 
-        /* HTML Preview */
-        .preview-toggle {
-            margin-bottom: 16px;
+        small {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
         }
 
-        .preview-box {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 32px;
-            margin-top: 16px;
-            display: none;
-        }
-
-        .preview-box.active {
-            display: block;
-        }
-
-        .preview-box h1,
-        .preview-box h2,
-        .preview-box h3 {
+        small a {
             color: var(--accent);
-            margin-bottom: 16px;
+            text-decoration: none;
         }
 
-        .preview-box p {
-            margin-bottom: 16px;
-        }
-
-        .preview-box img {
-            max-width: 100%;
-            border-radius: 8px;
+        small a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -203,50 +184,59 @@
     <div class="container">
         <div class="header">
             <div class="logo">{% if post %}Edit Post{% else %}Post Baru{% endif %}</div>
-            <a href="/" class="back-link">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Kembali
-            </a>
+            <a href="/" class="back-link">← Kembali</a>
         </div>
 
         <div class="content">
+            <h1 class="form-title">{% if post %}Edit Post{% else %}Post Baru{% endif %}</h1>
+
             <form method="post" action="/save">
                 <input type="hidden" name="original_slug" value="{% if post %}{{ post.slug }}{% endif %}">
+                <input type="hidden" id="pub_date_str" value="{% if post %}{{ post.pub_date }}{% endif %}">
 
                 <div class="form-group">
                     <label for="title">Judul Post *</label>
                     <input type="text" id="title" name="title" required
                            value="{% if post %}{{ post.title }}{% endif %}"
                            placeholder="Masukkan judul postingan...">
+
+                    {% if not post %}
+                    <small>
+                        <a href="javascript:void(0)" id="toggle-date">📅 Atur tanggal publikasi</a>
+                        (Otomatis: waktu sekarang)
+                    </small>
+                    {% endif %}
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="year">Tahun</label>
-                        <input type="number" id="year" name="year" value="2024" min="2020" max="2030">
-                    </div>
-                    <div class="form-group">
-                        <label for="month">Bulan</label>
-                        <select id="month" name="month">
-                            <option value="1">Januari</option>
-                            <option value="2">Februari</option>
-                            <option value="3">Maret</option>
-                            <option value="4">April</option>
-                            <option value="5" selected>Mei</option>
-                            <option value="6">Juni</option>
-                            <option value="7">Juli</option>
-                            <option value="8">Agustus</option>
-                            <option value="9">September</option>
-                            <option value="10">Oktober</option>
-                            <option value="11">November</option>
-                            <option value="12">Desember</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="day">Tanggal</label>
-                        <input type="number" id="day" name="day" value="1" min="1" max="31">
+                <!-- Date picker - hidden by default for new posts -->
+                <div class="form-group" id="date-picker-group" {% if not post %}style="display: none;"{% endif %}>
+                    <label>{% if post %}Tanggal Publikasi{% else %}Atur Tanggal Publikasi{% endif %}</label>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="day" style="font-size: 0.8rem;">Tanggal</label>
+                            <input type="number" id="day" name="day" value="" min="1" max="31">
+                        </div>
+                        <div class="form-group">
+                            <label for="month" style="font-size: 0.8rem;">Bulan</label>
+                            <select id="month" name="month">
+                                <option value="1">Januari</option>
+                                <option value="2">Februari</option>
+                                <option value="3">Maret</option>
+                                <option value="4">April</option>
+                                <option value="5">Mei</option>
+                                <option value="6">Juni</option>
+                                <option value="7">Juli</option>
+                                <option value="8">Agustus</option>
+                                <option value="9">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Desember</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="year" style="font-size: 0.8rem;">Tahun</label>
+                            <input type="number" id="year" name="year" value="2026" min="2020" max="2030">
+                        </div>
                     </div>
                 </div>
 
@@ -303,6 +293,43 @@
     </div>
 
     <script>
+        // Toggle date picker
+        const toggleDateBtn = document.getElementById('toggle-date');
+        const datePickerGroup = document.getElementById('date-picker-group');
+
+        if (toggleDateBtn) {
+            toggleDateBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (datePickerGroup.style.display === 'none') {
+                    datePickerGroup.style.display = 'block';
+                    // Set current date when showing
+                    const now = new Date();
+                    document.getElementById('day').value = now.getDate();
+                    document.getElementById('month').value = now.getMonth() + 1;
+                    document.getElementById('year').value = now.getFullYear();
+                    this.textContent = '📅 Sembunyikan tanggal';
+                } else {
+                    datePickerGroup.style.display = 'none';
+                    this.textContent = '📅 Atur tanggal publikasi';
+                }
+            });
+        }
+
+        // Set date from existing post
+        const pubDateStr = document.getElementById('pub_date_str').value;
+        if (pubDateStr) {
+            // Parse date like "Wed, 14 Jan 2026 21:23:44 +0000"
+            const months = {'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12};
+            const dateMatch = pubDateStr.match(/(\d{2})\s+(\w+)\s+(\d{4})/);
+            if (dateMatch) {
+                document.getElementById('day').value = dateMatch[1];
+                document.getElementById('month').value = months[dateMatch[2]];
+                document.getElementById('year').value = dateMatch[3];
+                // Show date picker for existing posts
+                datePickerGroup.style.display = 'block';
+            }
+        }
+
         // Auto-generate slug from title
         const titleInput = document.getElementById('title');
         const slugInput = document.getElementById('slug');
@@ -360,18 +387,6 @@
                 });
             }
         });
-
-        // Set date from existing post
-        {% if post and post.pub_date %}
-            const pubDate = '{{ post.pub_date }}';
-            const dateMatch = pubDate.match(/(\d{2})\s+(\w+)\s+(\d{4})/);
-            if (dateMatch) {
-                const months = {'Jan':1,'Feb':2,'Mar':3,'Apr':4,'May':5,'Jun':6,'Jul':7,'Aug':8,'Sep':9,'Oct':10,'Nov':11,'Dec':12};
-                document.getElementById('day').value = dateMatch[1];
-                document.getElementById('month').value = months[dateMatch[2]];
-                document.getElementById('year').value = dateMatch[3];
-            }
-        {% endif %}
     </script>
 </body>
 </html>

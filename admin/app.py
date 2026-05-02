@@ -141,11 +141,16 @@ def save_post():
     # Parse categories
     categories = [c.strip() for c in categories_str.split(',') if c.strip()]
 
-    # Format date
-    try:
-        pub_date = format_date_storage(int(year), int(month), int(day))
-    except:
-        pub_date = format_date_storage(2024, 1, 1)
+    # Format date - use current date if not provided
+    if year and month and day:
+        try:
+            pub_date = format_date_storage(int(year), int(month), int(day))
+        except:
+            pub_date = datetime.now().strftime('%a, %d %b %Y %H:%M:%S +0000')
+    else:
+        # Use current date/time
+        now = datetime.now()
+        pub_date = now.strftime('%a, %d %b %Y %H:%M:%S +0000')
 
     # Build post data
     post_data = {
