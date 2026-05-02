@@ -433,10 +433,10 @@ def update_ebook_html_all():
         whatsapp_msg = f'Halo,%20saya%20ingin%20membeli%20E-Book%20%22{ebook["title"].replace(" ", "%20")}%22%20seharga%20Rp%20{price_formatted.replace(".", "")}'
         whatsapp_link = f'https://wa.me/{ebook["whatsapp"]}?text={whatsapp_msg}'
 
-        # Cover image or book mockup
+        # Cover image or book mockup (e-buku.html is in pages/ folder, so use ../images/)
         cover_html = ''
         if ebook.get('cover_image'):
-            cover_html = f'<img src="images/{ebook["cover_image"]}" alt="{ebook["title"]}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">'
+            cover_html = f'<img src="../images/{ebook["cover_image"]}" alt="{ebook["title"]}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">'
         else:
             cover_html = '<div class="book-mockup"></div>'
 
