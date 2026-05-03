@@ -440,7 +440,7 @@ def update_ebook_html_all():
         else:
             cover_html = '<div class="book-mockup"></div>'
 
-        ebook_cards_html += f'''                <div class="ebook-card">
+        ebook_cards_html += f'''                <div class="ebook-card" data-ebook-id="{ebook['id']}">
                     <div class="ebook-cover">
                         {cover_html}
                     </div>
@@ -463,12 +463,21 @@ def update_ebook_html_all():
                                     <span class="price-value">Rp {price_formatted}</span>
                                     <span class="price-original">Rp {price_original_formatted}</span>
                                 </div>
-                                <a href="{whatsapp_link}" class="buy-button" target="_blank">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                                    </svg>
-                                    Beli
-                                </a>
+                                <div class="button-group">
+                                    <button class="preview-button" onclick="openPreview('{ebook['id']}')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        Preview
+                                    </button>
+                                    <a href="{whatsapp_link}" class="buy-button" target="_blank">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                        </svg>
+                                        Beli
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
