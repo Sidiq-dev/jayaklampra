@@ -228,6 +228,13 @@ def generate_and_push():
                        text=True,
                        timeout=30)
 
+        # Pull with rebase before pushing to avoid conflicts
+        subprocess.run(['git', 'pull', '--rebase'],
+                       cwd=BASE_DIR,
+                       capture_output=True,
+                       text=True,
+                       timeout=60)
+
         push_result = subprocess.run(['git', 'push'],
                                     cwd=BASE_DIR,
                                     capture_output=True,
@@ -676,6 +683,13 @@ def push_to_github():
                        capture_output=True,
                        text=True,
                        timeout=30)
+
+        # Pull with rebase before pushing to avoid conflicts
+        subprocess.run(['git', 'pull', '--rebase'],
+                       cwd=BASE_DIR,
+                       capture_output=True,
+                       text=True,
+                       timeout=60)
 
         # Push to remote
         result = subprocess.run(['git', 'push'],
