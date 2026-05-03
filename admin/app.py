@@ -281,6 +281,37 @@ def upload_image():
 
     return jsonify({'success': True, 'filename': unique_filename})
 
+@app.route('/upload-tinymce-image', methods=['POST'])
+def upload_tinymce_image():
+    """Handle image upload from TinyMCE editor"""
+    # TinyMCE sends file in 'file' or 'image' parameter
+    file = request.files.get('file') or request.files.get('image')
+
+    if not file:
+        return jsonify({'error': 'No file uploaded'}), 400
+
+    if not allowed_file(file.filename):
+        return jsonify({'error': 'Invalid file type'}), 400
+
+    # Check file size
+    file.seek(0, os.SEEK_END)
+    file_size = file.tell()
+    file.seek(0)
+
+    if file_size > MAX_FILE_SIZE:
+        return jsonify({'error': 'File too large'}), 400
+
+    # Generate unique filename
+    ext = file.filename.rsplit('.', 1)[1].lower()
+    unique_filename = f"{uuid.uuid4().hex[:8]}_{secure_filename(file.filename)}"
+
+    # Save file
+    filepath = os.path.join(IMAGES_DIR, unique_filename)
+    file.save(filepath)
+
+    # TinyMCE expects {location: "url"} format
+    return jsonify({'location': f'/images/{unique_filename}'})
+
 @app.route('/images/<path:filename>')
 def serve_image(filename):
     """Serve images from the images folder"""

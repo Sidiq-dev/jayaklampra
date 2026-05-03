@@ -274,7 +274,7 @@
 
                 <div class="form-group">
                     <label for="content">Konten *</label>
-                    <p class="help-text" style="margin-bottom: 8px;">Support HTML. Contoh: &lt;p&gt;Paragraf&lt;/p&gt;, &lt;img src="images/nama.jpg"&gt;</p>
+                    <p class="help-text" style="margin-bottom: 8px;">Editor visual - bold, italic, heading, list, quote, dll</p>
                     <textarea id="content" name="content" required
                               placeholder="Masukkan konten postingan...">{% if post %}{{ post.content }}{% endif %}</textarea>
                 </div>
@@ -384,6 +384,61 @@
                 })
                 .catch(error => {
                     alert('Error uploading image: ' + error);
+                });
+            }
+        });
+    </script>
+
+    <!-- TinyMCE WYSIWYG Editor -->
+    <script src="https://cdn.tiny.cloud/1/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+        tinymce.init({
+            selector: '#content',
+            height: 500,
+            menubar: true,
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount'
+            ],
+            toolbar: 'undo redo | blocks | ' +
+                'bold italic underline strikethrough | alignleft aligncenter ' +
+                'alignright alignjustify | bullist numlist outdent indent | ' +
+                'forecolor backcolor | removeformat | ' +
+                'link image media table | code | help',
+            content_style: 'body { font-family:Georgia,serif; font-size:16px; line-height:1.6; color:#e8e6e3; } p { margin-bottom:1em; }',
+            skin: 'oxide-dark',
+            content_css: 'oxide-dark',
+            branding: false,
+            promotion: false,
+            resize: true,
+            relative_urls: false,
+            remove_script_host: false,
+            convert_urls: true,
+            image_caption: true,
+            image_title: true,
+            images_upload_url: '/upload-tinymce-image',
+            images_upload_base_path: '../images/',
+            automatic_uploads: true,
+            file_picker_types: 'image',
+            images_upload_handler: function (blobInfo, success, failure) {
+                const formData = new FormData();
+                formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+                fetch('/upload-image', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        success('../images/' + data.filename);
+                    } else {
+                        failure('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    failure('Error uploading image: ' + error);
                 });
             }
         });
