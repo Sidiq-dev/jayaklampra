@@ -4,7 +4,11 @@
   "rewrites": [
     {
       "source": "/:path*",
-      "destination": "/:path*"
+      "destination": "/pages/:path*.html"
+    },
+    {
+      "source": "/",
+      "destination": "/index.html"
     }
   ],
   "git": {
