@@ -206,6 +206,46 @@ def generate():
         flash(f'Error: {str(e)}', 'error')
     return redirect(url_for('index'))
 
+@app.route('/generate-and-push')
+def generate_and_push():
+    """Generate and auto-push to GitHub"""
+    try:
+        from generate import generate_site
+        result = generate_site()
+
+        # Git add, commit, push
+        subprocess.run(['git', 'add', '.'],
+                       cwd=BASE_DIR,
+                       capture_output=True,
+                       text=True,
+                       timeout=30)
+
+        commit_msg = f'Auto-update from admin CMS - {datetime.now().strftime("%Y-%m-%d %H:%M")}'
+        subprocess.run(['git', 'commit', '-m', commit_msg,
+                       '-m', 'Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>'],
+                       cwd=BASE_DIR,
+                       capture_output=True,
+                       text=True,
+                       timeout=30)
+
+        push_result = subprocess.run(['git', 'push'],
+                                    cwd=BASE_DIR,
+                                    capture_output=True,
+                                    text=True,
+                                    timeout=60)
+
+        if push_result.returncode == 0:
+            flash(f'{result} | Berhasil push ke GitHub!', 'success')
+        else:
+            flash(f'{result} | Push gagal: {push_result.stderr}', 'error')
+
+    except subprocess.TimeoutExpired:
+        flash('Timeout - cek koneksi internet', 'error')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'error')
+
+    return redirect(url_for('index'))
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -582,6 +622,48 @@ def update_ebook_html_all():
 
         with open(ebook_page, 'w', encoding='utf-8') as f:
             f.write(content)
+
+# ========== AUTO PUSH TO GITHUB ==========
+import subprocess
+
+@app.route('/push-to-github')
+def push_to_github():
+    """Push changes to GitHub automatically"""
+    try:
+        # Add all changes
+        subprocess.run(['git', 'add', '.'],
+                       cwd=BASE_DIR,
+                       capture_output=True,
+                       text=True,
+                       timeout=30)
+
+        # Commit with auto message
+        commit_msg = f'Auto-update from admin CMS - {datetime.now().strftime("%Y-%m-%d %H:%M")}'
+        subprocess.run(['git', 'commit', '-m', commit_msg,
+                       '-m', 'Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>'],
+                       cwd=BASE_DIR,
+                       capture_output=True,
+                       text=True,
+                       timeout=30)
+
+        # Push to remote
+        result = subprocess.run(['git', 'push'],
+                               cwd=BASE_DIR,
+                               capture_output=True,
+                               text=True,
+                               timeout=60)
+
+        if result.returncode == 0:
+            flash('Berhasil push ke GitHub!', 'success')
+        else:
+            flash(f'Push gagal: {result.stderr}', 'error')
+
+    except subprocess.TimeoutExpired:
+        flash('Push timeout - coba lagi', 'error')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'error')
+
+    return redirect(url_for('index'))
 
 # Template filters
 @app.template_filter('date_display')
