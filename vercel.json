@@ -6,5 +6,10 @@
       "source": "/:path*",
       "destination": "/:path*"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "github": true
+    }
+  }
 }
