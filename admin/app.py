@@ -51,11 +51,12 @@ def login_required(f):
     return decorated
 
 # Paths
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_FILE = os.path.join(os.path.dirname(__file__), 'data', 'posts.json')
-EBOOK_FILE = os.path.join(os.path.dirname(__file__), 'data', 'ebook.json')
-WP_EXPORT_FILE = r'C:\Users\LENOVO\Downloads\jayaklampra.WordPress.2026-05-01.xml'
-IMAGES_DIR = os.path.join(BASE_DIR, 'images')
+ADMIN_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(ADMIN_DIR)
+DATA_FILE = os.path.join(ADMIN_DIR, 'data', 'posts.json')
+EBOOK_FILE = os.path.join(ADMIN_DIR, 'data', 'ebook.json')
+WP_EXPORT_FILE = os.environ.get('WP_EXPORT_FILE', r'C:\Users\LENOVO\Downloads\jayaklampra.WordPress.2026-05-01.xml')
+IMAGES_DIR = os.path.join(ADMIN_DIR, 'images') if os.environ.get('RAILWAY_ENVIRONMENT') else os.path.join(BASE_DIR, 'images')
 
 # Upload config
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
