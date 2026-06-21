@@ -3,7 +3,8 @@ Jaya Klampra - Admin CMS
 Dashboard sederhana untuk mengelola postingan website
 """
 
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory, session
+from functools import wraps
 import json
 import os
 import re
@@ -11,10 +12,41 @@ from datetime import datetime
 import xml.etree.ElementTree as ET
 import html as html_lib
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
 
 app = Flask(__name__)
-app.secret_key = 'jayaklampra-admin-key-2024'
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'jayaklampra-admin-key-2024')
+
+# Auth
+AUTH_FILE = os.path.join(os.path.dirname(__file__), 'data', 'auth.json')
+
+def load_auth():
+    if os.path.exists(AUTH_FILE):
+        with open(AUTH_FILE, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return None
+
+def save_auth(auth_data):
+    os.makedirs(os.path.dirname(AUTH_FILE), exist_ok=True)
+    with open(AUTH_FILE, 'w', encoding='utf-8') as f:
+        json.dump(auth_data, f, ensure_ascii=False, indent=2)
+
+def init_auth():
+    if not load_auth():
+        save_auth({
+            'username': 'admin',
+            'password': generate_password_hash('admin'),
+            'initialized': False
+        })
+
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get('logged_in'):
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated
 
 # Paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -89,8 +121,63 @@ def format_date_display(date_str):
 def format_date_storage(year, month, day, hour=0, minute=0):
     return f'{["Mon","Tue","Wed","Thu","Fri","Sat","Sun"][datetime(year,month,day).weekday()]}, {day:02d} {["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][month-1]} {year} {hour:02d}:{minute:02d}:00 +0000'
 
+# Auth routes
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if session.get('logged_in'):
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        username = request.form.get('username', '')
+        password = request.form.get('password', '')
+        auth = load_auth()
+
+        if auth and username == auth['username'] and check_password_hash(auth['password'], password):
+            session['logged_in'] = True
+            session['username'] = username
+            if not auth.get('initialized'):
+                flash('Login berhasil! Silakan ganti password default.', 'success')
+                return redirect(url_for('change_password'))
+            flash('Login berhasil!', 'success')
+            return redirect(url_for('index'))
+        else:
+            flash('Username atau password salah', 'error')
+
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('Berhasil logout', 'success')
+    return redirect(url_for('login'))
+
+@app.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        current = request.form.get('current_password', '')
+        new_pass = request.form.get('new_password', '')
+        confirm = request.form.get('confirm_password', '')
+        auth = load_auth()
+
+        if not check_password_hash(auth['password'], current):
+            flash('Password lama salah', 'error')
+        elif len(new_pass) < 6:
+            flash('Password baru minimal 6 karakter', 'error')
+        elif new_pass != confirm:
+            flash('Konfirmasi password tidak cocok', 'error')
+        else:
+            auth['password'] = generate_password_hash(new_pass)
+            auth['initialized'] = True
+            save_auth(auth)
+            flash('Password berhasil diubah!', 'success')
+            return redirect(url_for('index'))
+
+    return render_template('change_password.html')
+
 # Routes
 @app.route('/')
+@login_required
 def index():
     posts = load_posts()
     ebooks = load_ebooks()
@@ -107,10 +194,12 @@ def index():
     return render_template('index.html', posts=posts_sorted, ebooks=ebooks)
 
 @app.route('/new')
+@login_required
 def new_post():
     return render_template('edit.html', post=None)
 
 @app.route('/edit/<slug>')
+@login_required
 def edit_post(slug):
     posts = load_posts()
     post = next((p for p in posts if p.get('slug') == slug), None)
@@ -120,6 +209,7 @@ def edit_post(slug):
     return render_template('edit.html', post=post)
 
 @app.route('/save', methods=['POST'])
+@login_required
 def save_post():
     posts = load_posts()
 
@@ -180,6 +270,7 @@ def save_post():
     return redirect(url_for('index'))
 
 @app.route('/delete/<slug>')
+@login_required
 def delete_post(slug):
     posts = load_posts()
     posts = [p for p in posts if p.get('slug') != slug]
@@ -188,6 +279,7 @@ def delete_post(slug):
     return redirect(url_for('index'))
 
 @app.route('/preview/<slug>')
+@login_required
 def preview_post(slug):
     posts = load_posts()
     post = next((p for p in posts if p.get('slug') == slug), None)
@@ -196,6 +288,7 @@ def preview_post(slug):
     return render_template('preview.html', post=post)
 
 @app.route('/generate')
+@login_required
 def generate():
     """Generate static HTML files from admin data"""
     try:
@@ -207,6 +300,7 @@ def generate():
     return redirect(url_for('index'))
 
 @app.route('/generate-and-push')
+@login_required
 def generate_and_push():
     """Generate and auto-push to GitHub"""
     try:
@@ -257,6 +351,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/upload-image', methods=['POST'])
+@login_required
 def upload_image():
     """Handle image upload"""
     if 'image' not in request.files:
@@ -289,6 +384,7 @@ def upload_image():
     return jsonify({'success': True, 'filename': unique_filename})
 
 @app.route('/upload-tinymce-image', methods=['POST'])
+@login_required
 def upload_tinymce_image():
     """Handle image upload from TinyMCE editor"""
     # TinyMCE sends file in 'file' or 'image' parameter
@@ -325,6 +421,7 @@ def serve_image(filename):
     return send_from_directory(IMAGES_DIR, filename)
 
 @app.route('/import-wp')
+@login_required
 def import_wp():
     """Import posts from WordPress export"""
     try:
@@ -395,17 +492,20 @@ def import_wp():
 
 # ========== E-BOOKS MANAGEMENT ==========
 @app.route('/ebook')
+@login_required
 def ebook_list():
     """E-Books list page"""
     ebooks = load_ebooks()
     return render_template('ebooks.html', ebooks=ebooks)
 
 @app.route('/ebook/new')
+@login_required
 def ebook_new():
     """Create new e-book page"""
     return render_template('ebook_form.html', ebook=None)
 
 @app.route('/ebook/edit/<id>')
+@login_required
 def ebook_edit(id):
     """Edit e-book page"""
     ebook = load_ebook_by_id(id)
@@ -415,6 +515,7 @@ def ebook_edit(id):
     return render_template('ebook_form.html', ebook=ebook)
 
 @app.route('/ebook/save', methods=['POST'])
+@login_required
 def ebook_save():
     """Save e-book (create or update)"""
     ebooks = load_ebooks()
@@ -471,6 +572,7 @@ def ebook_save():
     return redirect(url_for('ebook_list'))
 
 @app.route('/ebook/delete/<id>')
+@login_required
 def ebook_delete(id):
     """Delete e-book"""
     ebooks = load_ebooks()
@@ -665,6 +767,7 @@ def update_ebook_html_all():
 import subprocess
 
 @app.route('/push-to-github')
+@login_required
 def push_to_github():
     """Push changes to GitHub automatically"""
     try:
@@ -724,6 +827,8 @@ def format_price_filter(price):
         return str(price)
 
 if __name__ == '__main__':
+    init_auth()
+
     # Initial import if data file doesn't exist
     if not os.path.exists(DATA_FILE) and os.path.exists(WP_EXPORT_FILE):
         print('Mengimport posts dari WordPress export...')
