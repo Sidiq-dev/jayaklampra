@@ -34,10 +34,12 @@ def save_auth(auth_data):
 
 def init_auth():
     if not load_auth():
+        username = os.environ.get('ADMIN_USERNAME', 'admin')
+        password = os.environ.get('ADMIN_PASSWORD', 'admin')
         save_auth({
-            'username': 'admin',
-            'password': generate_password_hash('admin'),
-            'initialized': False
+            'username': username,
+            'password': generate_password_hash(password),
+            'initialized': bool(os.environ.get('ADMIN_PASSWORD'))
         })
 
 def login_required(f):
@@ -826,9 +828,9 @@ def format_price_filter(price):
     except:
         return str(price)
 
-if __name__ == '__main__':
-    init_auth()
+init_auth()
 
+if __name__ == '__main__':
     # Initial import if data file doesn't exist
     if not os.path.exists(DATA_FILE) and os.path.exists(WP_EXPORT_FILE):
         print('Mengimport posts dari WordPress export...')
